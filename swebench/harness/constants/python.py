@@ -902,6 +902,39 @@ SPECS_PYDICOM.update(
 
 SPECS_HUMANEVAL = {k: {"python": "3.9", "test_cmd": "python"} for k in ["1.0"]}
 
+# Rich uses pytest
+# v5.x-v12.x: Uses commonmark, old poetry (no PEP 660), Python 3.6+
+# v13.x+: Uses markdown-it-py, modern poetry, Python 3.7+
+SPECS_RICH_OLD = {
+    # Use Python 3.9 for compatibility
+    "python": "3.9",
+    # Old poetry doesn't support PEP 660, use non-editable install
+    "install": "pip install .",
+    # Pin pytest to 7.x and exceptiongroup to avoid typing issues
+    "pip_packages": [
+        "'pytest<8'",
+        "'exceptiongroup<1.2'",
+        "commonmark",
+        "pygments",
+        "colorama",
+    ],
+    "test_cmd": TEST_PYTEST,
+}
+SPECS_RICH_NEW = {
+    "python": "3.9",
+    "install": "pip install -e .",
+    "pip_packages": ["pytest", "markdown-it-py", "pygments"],
+    "test_cmd": TEST_PYTEST,
+}
+SPECS_RICH = {}
+# Generate specs for all minor versions
+for major in range(5, 13):  # v5.x - v12.x use old deps
+    for minor in range(0, 20):
+        SPECS_RICH[f"{major}.{minor}"] = SPECS_RICH_OLD.copy()
+for major in range(13, 20):  # v13.x+ use new deps
+    for minor in range(0, 20):
+        SPECS_RICH[f"{major}.{minor}"] = SPECS_RICH_NEW.copy()
+
 # Constants - Task Instance Instllation Environment
 MAP_REPO_VERSION_TO_SPECS_PY = {
     "astropy/astropy": SPECS_ASTROPY,
@@ -924,6 +957,7 @@ MAP_REPO_VERSION_TO_SPECS_PY = {
     "sqlfluff/sqlfluff": SPECS_SQLFLUFF,
     "swe-bench/humaneval": SPECS_HUMANEVAL,
     "sympy/sympy": SPECS_SYMPY,
+    "Textualize/rich": SPECS_RICH,
 }
 
 # Constants - Repository Specific Installation Instructions
